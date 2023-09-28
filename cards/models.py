@@ -1,5 +1,5 @@
 from django.db import models
-from store.models import Product
+from store.models import Product,Variation
 # Create your models here.
 
 class Card(models.Model):
@@ -16,6 +16,7 @@ class Card(models.Model):
 
 class CardItem(models.Model):
     product=models.ForeignKey(Product,on_delete=models.CASCADE)
+    variation=models.ManyToManyField(Variation,blank=True)
     card=models.ForeignKey(Card,on_delete=models.CASCADE)
     quantity=models.IntegerField()
     is_active=models.BooleanField(default=True)
@@ -24,5 +25,7 @@ class CardItem(models.Model):
         verbose_name="CardItem" 
         verbose_name_plural="CardItems"
 
-    def __str__(self):
+    def sub_total(self):
+        return self.product.price * self.quantity
+    def __unicode__(self):
         return self.product
