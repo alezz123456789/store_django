@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'accounts',
     'store',
     'cards',
+    'dashboard',
 ]
 
 MIDDLEWARE = [
@@ -134,5 +135,19 @@ MEDIA_ROOT='media/'
 MEDIA_ROOT = BASE_DIR /'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
+
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: "danger",
+    50: "critical",
+}
+
+# smtp conf
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER ='alezzalsayani689@gmail.com'
+EMAIL_HOST_PASSWORD = 'chug fjkp ipmr exib' 
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
