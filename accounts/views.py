@@ -13,6 +13,12 @@ from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
+# get card item 
+from cards.models import Card,CardItem
+from cards.views import _card_id
+
+import requests
+
 def register(request):
     if request.method=='POST':
         form=RegistrationForms(request.POST)
@@ -60,9 +66,59 @@ def login(request):
         user=auth.authenticate(email=email,password=password)
 
         if user is not None:
+            try:
+                card=Card.objects.get(card_id=_card_id(request))
+                is_card_item_exists=CardItem.objects.filter(card=card).exists()
+                if is_card_item_exists:
+                    card_item=CardItem.objects.filter(card=card)
+
+                    # getting the product variation
+                    product_variation=[]
+                    for item in card_item:
+                        variation=item.variation.all()
+                        product_variation.append(list(variation))
+                    
+                    # get the card_item from the user to access has product variation
+                    card_item=CardItem.objects.filter(user=user)
+                    ex_var_list=[]
+                    id=[]
+                    for item in card_item:
+                        existing_variation=item.variation.all()
+                        ex_var_list.append(list(existing_variation))
+                        id.append(item.id)
+                    
+                    # product_variation=[1,2,3,4,6]
+                    # ex_var_list=[4,2,3,6]
+                    for pr in product_variation:
+                        if pr in ex_var_list:
+                            index=ex_var_list.index(pr)
+                            item_id=id[index]
+                            item=CardItem.objects.get(id=item_id)
+                            item.quantity +=1
+                            item.user=user
+                            item.save()
+                        else:
+                            card_item=CardItem.objects.filter(card=card) 
+                            for item in card_item:
+                                item.user=user
+                                item.save()
+
+            except:
+                pass
             auth.login(request,user)
             messages.success(request,"You Are Login Successful.")
-            return redirect('dashboard')
+            url=request.META.get('HTTP_REFERER')
+            try:
+                query=requests.utils.urlparse(url).query
+                
+                # next = /card/checkout/
+                params=dict(x.split('=') for x in query.split('&'))
+                if 'next' in params:
+                    nextPage=params['next']
+                    return redirect(nextPage)
+                    # return redirect('dashboard')
+            except:
+                return redirect('dashboard')
         else:
             messages.error(request,"Invalid login in")
             return redirect('login')

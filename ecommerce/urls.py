@@ -24,7 +24,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home ,name="home"),
-    path('store', include('store.urls')),
-    path('card', include('cards.urls')),
+    path('store/', include('store.urls')),
+    path('card/', include('cards.urls')),
     path('accounts/', include('accounts.urls')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
